@@ -240,6 +240,27 @@ class StrTests(TranspileTestCase):
                     print(err)
             """)
 
+    def test_splitlines(self):
+        self.assertCodeExecution("""
+            s = 'ab c\\nde fg\\rkl\\r\\nabc'
+            print(s.splitlines())
+            print(s.splitlines(0))
+            print(s.splitlines(True))
+            print("s".splitlines(True))
+            try:
+                print(s.splitlines(None))
+            except TypeError as err:
+                print(err)
+            try:
+                print(s.splitlines(1.0))
+            except TypeError as err:
+                print(err)
+            try:
+                print(s.splitlines(1j))
+            except TypeError as err:
+                print(err)
+            """)
+
     def test_index(self):
         self.assertCodeExecution("""
             s = 'hello hell'
