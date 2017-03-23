@@ -1154,22 +1154,24 @@ public class Str extends org.python.types.Object {
         } else if (keepends instanceof org.python.types.Int) {
             parseKeepEnd = ((org.python.types.Int) keepends).value != 0;
         } else if (keepends instanceof org.python.types.Float) {
-            throw new org.python.exceptions.TypeError("integer argument expected, got "+keepends.typeName());
+            throw new org.python.exceptions.TypeError("integer argument expected, got " + keepends.typeName());
         } else if (keepends instanceof org.python.types.Complex) {
-        throw new org.python.exceptions.TypeError("can't convert "+keepends.typeName()+" to int");
+            throw new org.python.exceptions.TypeError("can't convert " + keepends.typeName() + " to int");
         } else {
-            throw new org.python.exceptions.TypeError("an integer is required (got type "+keepends.typeName()+")");
+            throw new org.python.exceptions.TypeError("an integer is required (got type " + keepends.typeName() + ")");
         }
 
         org.python.types.List result_list = new org.python.types.List();
-        
-        if (this.value.isEmpty()) return result_list;
+
+        if (this.value.isEmpty()) {
+            return result_list;
+        }
 
         java.lang.String[] result;
         // List of line boundaries from https://docs.python.org/3.4/library/stdtypes.html#str.splitlines
         java.lang.String lineBoundaries = "\\r\\n|\\n|\\r|\\v|\\x0b|\\f|\\x0c|\\x1c|\\x1d|\\x1e|\\x85|\\u2028|\\u2029";
-        java.lang.String[] lineBoundariesList = {"\\r\\n","\\n","\\r","\\v","\\x0b","\\f","\\x0c","\\x1c","\\x1d","\\x1e","\\x85","\\u2028","\\u2029"};
-        
+        java.lang.String[] lineBoundariesList = {"\\r\\n", "\\n", "\\r", "\\v", "\\x0b", "\\f", "\\x0c", "\\x1c", "\\x1d", "\\x1e", "\\x85", "\\u2028", "\\u2029"};
+
         if (!parseKeepEnd) {
             result = this.value.toString().split(lineBoundaries);
             for (java.lang.String w : result) {
@@ -1180,20 +1182,20 @@ public class Str extends org.python.types.Object {
             int j = 1;
             while (j < this.value.toString().length()) {
                 boolean matches = false;
-                java.lang.String substring = this.value.toString().substring(i,j);
+                java.lang.String substring = this.value.toString().substring(i, j);
                 int i_offset = 0;
                 for (java.lang.String lb : lineBoundariesList) {
-                    if (substring.matches("(?s).*"+lb+".*")) {
+                    if (substring.matches("(?s).*" + lb + ".*")) {
                         matches = true;
                         if (lb.equals("\\r")) {
-                            if (this.value.toString().substring(i,j+1).matches("(?s).*\\r\\n.*")) {
-                                substring = this.value.toString().substring(i,j-1) + "\\r\\n";
+                            if (this.value.toString().substring(i, j + 1).matches("(?s).*\\r\\n.*")) {
+                                substring = this.value.toString().substring(i, j - 1) + "\\r\\n";
                                 i_offset = 1;
                             } else {
-                                substring = this.value.toString().substring(i,j-1) + "\\r";
+                                substring = this.value.toString().substring(i, j - 1) + "\\r";
                             }
                         } else {
-                            substring = this.value.toString().substring(i,j-1) + lb;
+                            substring = this.value.toString().substring(i, j - 1) + lb;
                         }
                         break;
                     }
@@ -1205,13 +1207,12 @@ public class Str extends org.python.types.Object {
                 } else {
                     j += 1;
                 }
-                
+
             }
-            result_list.append(new org.python.types.Str(this.value.toString().substring(i,j)));
+            result_list.append(new org.python.types.Str(this.value.toString().substring(i, j)));
 
         }
 
-        
         return result_list;
     }
 
