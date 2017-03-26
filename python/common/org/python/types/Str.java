@@ -1300,73 +1300,64 @@ public class Str extends org.python.types.Object {
             default_args = "keepends"
     )
     public org.python.Object splitlines(org.python.Object keepends) {
-        boolean parseKeepEnd;
+        
+        boolean hasKeepEnds;
         if (keepends == null) {
-            parseKeepEnd = false;
-        } else if (keepends instanceof org.python.types.Bool) {
-            parseKeepEnd = ((org.python.types.Bool) keepends).value;
-        } else if (keepends instanceof org.python.types.Int) {
-            parseKeepEnd = ((org.python.types.Int) keepends).value != 0;
+            hasKeepEnds = false;
+        } else if (keepends instanceof org.python.types.Bool || keepends instanceof org.python.types.Int || keepends instanceof org.python.types.Complex) {
+            hasKeepEnds = ((org.python.types.Int) keepends.__int__()).value != 0;
         } else if (keepends instanceof org.python.types.Float) {
             throw new org.python.exceptions.TypeError("integer argument expected, got " + keepends.typeName());
-        } else if (keepends instanceof org.python.types.Complex) {
-            throw new org.python.exceptions.TypeError("can't convert " + keepends.typeName() + " to int");
         } else {
             throw new org.python.exceptions.TypeError("an integer is required (got type " + keepends.typeName() + ")");
         }
-
         org.python.types.List result_list = new org.python.types.List();
-
         if (this.value.isEmpty()) {
             return result_list;
         }
 
-        java.lang.String[] result;
         // List of line boundaries from https://docs.python.org/3.4/library/stdtypes.html#str.splitlines
-        java.lang.String lineBoundaries = "\\r\\n|\\n|\\r|\\v|\\x0b|\\f|\\x0c|\\x1c|\\x1d|\\x1e|\\x85|\\u2028|\\u2029";
-        java.lang.String[] lineBoundariesList = {"\\r\\n", "\\n", "\\r", "\\v", "\\x0b", "\\f", "\\x0c", "\\x1c", "\\x1d", "\\x1e", "\\x85", "\\u2028", "\\u2029"};
-
-        if (!parseKeepEnd) {
-            result = this.value.toString().split(lineBoundaries);
-            for (java.lang.String w : result) {
-                result_list.append(new org.python.types.Str(w));
+        java.util.HashMap<Character,String> lineBreakMap = new java.util.HashMap<Character,String>();
+        lineBreakMap.put('\n', "\\n");
+        lineBreakMap.put('\r', "\\r");
+        lineBreakMap.put('\u000B', "\\x0b");
+        lineBreakMap.put('\u000C', "\\x0c");
+        lineBreakMap.put('\u001C', "\\x1c");
+        lineBreakMap.put('\u001D', "\\x1d");
+        lineBreakMap.put('\u001E', "\\x1e");
+        lineBreakMap.put('\u0085', "\\x85");
+        lineBreakMap.put('\u2028', "\\u2028");
+        lineBreakMap.put('\u2029', "\\u2029");
+        char[] charArray = this.value.toCharArray();
+        int i = 0;
+        int j = 0;
+        int eol;
+        while (i < charArray.length) {
+            String linebreak = "";
+            while (i < charArray.length && !lineBreakMap.containsKey(charArray[i])) {
+                i ++;
             }
-        } else {
-            int i = 0;
-            int j = 1;
-            while (j < this.value.toString().length()) {
-                boolean matches = false;
-                java.lang.String substring = this.value.toString().substring(i, j);
-                int i_offset = 0;
-                for (java.lang.String lb : lineBoundariesList) {
-                    if (substring.matches("(?s).*" + lb + ".*")) {
-                        matches = true;
-                        if (lb.equals("\\r")) {
-                            if (this.value.toString().substring(i, j + 1).matches("(?s).*\\r\\n.*")) {
-                                substring = this.value.toString().substring(i, j - 1) + "\\r\\n";
-                                i_offset = 1;
-                            } else {
-                                substring = this.value.toString().substring(i, j - 1) + "\\r";
-                            }
-                        } else {
-                            substring = this.value.toString().substring(i, j - 1) + lb;
-                        }
-                        break;
-                    }
-                }
-                if (matches) {
-                    result_list.append(new org.python.types.Str(substring));
-                    i = j + i_offset;
-                    j = i + 1;
+            eol = i;
+            if (i < charArray.length) {
+                if (charArray[i] == '\r' && i + 1 < charArray.length && charArray[i + 1] == '\n') {
+                    linebreak = "\\r\\n";
+                    i += 2;
                 } else {
-                    j += 1;
+                    linebreak = lineBreakMap.get(charArray[i]);
+                    i ++;
                 }
-
             }
-            result_list.append(new org.python.types.Str(this.value.toString().substring(i, j)));
-
+            if (j == 0 && eol == charArray.length) {
+                result_list.append(new org.python.types.Str(this.value));
+                break;
+            }
+            String result = new java.lang.String(charArray, j, eol - j);
+            if (hasKeepEnds) {
+                result = result.concat(linebreak);
+            }
+            result_list.append(new org.python.types.Str(result));
+            j = i;
         }
-
         return result_list;
     }
 

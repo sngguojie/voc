@@ -241,24 +241,49 @@ class StrTests(TranspileTestCase):
             """)
 
     def test_splitlines(self):
+        # Check that all the line boundaries are detected
+        # List of line boundaries from https://docs.python.org/3.4/library/stdtypes.html#str.splitlines
         self.assertCodeExecution("""
-            s = 'ab c\\nde fg\\rkl\\r\\nabc'
-            print(s.splitlines())
-            print(s.splitlines(0))
-            print(s.splitlines(True))
-            print("s".splitlines(True))
+            s1 = '\\r\\n\\r\\n\\v\\f\\x0b\\x0c\\u2029\\x1c\\x1d\\x1e\\x85'
+            print(s1.splitlines())
+            print(s1.splitlines(True))
+            """)
+        # Check Error Handling
+        self.assertCodeExecution("""
+            s1 = 'a\\rb\\nc'
             try:
-                print(s.splitlines(None))
+                print(s1.splitlines(None))
             except TypeError as err:
                 print(err)
             try:
-                print(s.splitlines(1.0))
+                print(s1.splitlines(1.0))
             except TypeError as err:
                 print(err)
             try:
-                print(s.splitlines(1j))
+                print(s1.splitlines(1j))
             except TypeError as err:
                 print(err)
+            """)
+        # Other edge cases
+        self.assertCodeExecution("""
+            s1 = '\\r\\n12\\r3\\n4\\v5\\f6\\x0b7\\x0c8\\u20299\\x1c10\\x1d11\\x1e12\\x85'
+            print(s1.splitlines())
+            print(s1.splitlines(0))
+            print(s1.splitlines(False))
+            print(s1.splitlines(1))
+            print(s1.splitlines(True))
+            s2 = ''
+            print(s2.splitlines())
+            print(s2.splitlines(0))
+            print(s2.splitlines(False))
+            print(s2.splitlines(1))
+            print(s2.splitlines(True))
+            s3 = 'a b c'
+            print(s3.splitlines())
+            print(s3.splitlines(0))
+            print(s3.splitlines(False))
+            print(s3.splitlines(1))
+            print(s3.splitlines(True))
             """)
 
     def test_index(self):
