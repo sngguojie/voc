@@ -1300,7 +1300,7 @@ public class Str extends org.python.types.Object {
             default_args = "keepends"
     )
     public org.python.Object splitlines(org.python.Object keepends) {
-        
+
         boolean hasKeepEnds;
         if (keepends == null) {
             hasKeepEnds = false;
@@ -1317,7 +1317,7 @@ public class Str extends org.python.types.Object {
         }
 
         // List of line boundaries from https://docs.python.org/3.4/library/stdtypes.html#str.splitlines
-        java.util.HashMap<Character,String> lineBreakMap = new java.util.HashMap<Character,String>();
+        java.util.HashMap<Character, String> lineBreakMap = new java.util.HashMap<Character, String>();
         lineBreakMap.put('\n', "\\n");
         lineBreakMap.put('\r', "\\r");
         lineBreakMap.put('\u000B', "\\x0b");
@@ -1335,7 +1335,7 @@ public class Str extends org.python.types.Object {
         while (i < charArray.length) {
             String linebreak = "";
             while (i < charArray.length && !lineBreakMap.containsKey(charArray[i])) {
-                i ++;
+                i++;
             }
             eol = i;
             if (i < charArray.length) {
@@ -1344,7 +1344,7 @@ public class Str extends org.python.types.Object {
                     i += 2;
                 } else {
                     linebreak = lineBreakMap.get(charArray[i]);
-                    i ++;
+                    i++;
                 }
             }
             if (j == 0 && eol == charArray.length) {
