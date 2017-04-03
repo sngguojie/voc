@@ -70,7 +70,31 @@ public class Str extends org.python.types.Object {
             __doc__ = ""
     )
     public org.python.Object __repr__() {
-        return new org.python.types.Str("'" + this.value + "'");
+        String result = "";
+        char[] charArray = this.value.toCharArray();
+        for (int i = 0 ; i < charArray.length; i++) {
+            if (isLineBreak(charArray[i])) {
+                String lineBreak = "\\";
+                String hexString = Integer.toHexString(charArray[i]);
+                if (charArray[i] == '\n') {
+                    lineBreak += "n";
+                } else if (charArray[i] == '\r') {
+                    lineBreak += "r";
+                } else if (hexString.length() == 1) {
+                    lineBreak += "x0" + hexString;
+                } else if (hexString.length() == 2) {
+                    lineBreak += "x" + hexString;
+                } else if (hexString.length() == 3) {
+                    lineBreak += "u0" + hexString;
+                } else if (hexString.length() == 4) {
+                    lineBreak += "u" + hexString;
+                }
+                result += lineBreak;
+            } else {
+                result += charArray[i];
+            }
+        }
+        return new org.python.types.Str("'" + result + "'");
     }
 
     @org.python.Method(
@@ -1315,36 +1339,25 @@ public class Str extends org.python.types.Object {
         if (this.value.isEmpty()) {
             return result_list;
         }
-
-        // List of line boundaries from https://docs.python.org/3.4/library/stdtypes.html#str.splitlines
-        java.util.HashMap<Character, String> lineBreakMap = new java.util.HashMap<Character, String>();
-        lineBreakMap.put('\n', "\\n");
-        lineBreakMap.put('\r', "\\r");
-        lineBreakMap.put('\u000B', "\\x0b");
-        lineBreakMap.put('\u000C', "\\x0c");
-        lineBreakMap.put('\u001C', "\\x1c");
-        lineBreakMap.put('\u001D', "\\x1d");
-        lineBreakMap.put('\u001E', "\\x1e");
-        lineBreakMap.put('\u0085', "\\x85");
-        lineBreakMap.put('\u2028', "\\u2028");
-        lineBreakMap.put('\u2029', "\\u2029");
         char[] charArray = this.value.toCharArray();
         int i = 0;
         int j = 0;
         int eol;
         while (i < charArray.length) {
             String linebreak = "";
-            while (i < charArray.length && !lineBreakMap.containsKey(charArray[i])) {
+            while (i < charArray.length && !isLineBreak(charArray[i])) {
                 i++;
             }
             eol = i;
             if (i < charArray.length) {
                 if (charArray[i] == '\r' && i + 1 < charArray.length && charArray[i + 1] == '\n') {
-                    linebreak = "\\r\\n";
+                    linebreak = "\r\n";
                     i += 2;
                 } else {
-                    linebreak = lineBreakMap.get(charArray[i]);
                     i++;
+                }
+                if (hasKeepEnds) {
+                    eol = i;
                 }
             }
             if (j == 0 && eol == charArray.length) {
@@ -1352,13 +1365,29 @@ public class Str extends org.python.types.Object {
                 break;
             }
             String result = new java.lang.String(charArray, j, eol - j);
-            if (hasKeepEnds) {
-                result = result.concat(linebreak);
-            }
             result_list.append(new org.python.types.Str(result));
             j = i;
         }
         return result_list;
+    }
+    
+    private static boolean isLineBreak (char character) {
+        // List of line boundaries from https://docs.python.org/3.4/library/stdtypes.html#str.splitlines
+        switch (character) {
+            case '\n': 
+            case '\r': 
+            case '\u000B': 
+            case '\u000C': 
+            case '\u001C': 
+            case '\u001D':
+            case '\u001E':
+            case '\u0085':
+            case '\u2028':
+            case '\u2029':
+                return true;
+            default:
+                return false;
+        }
     }
 
     @org.python.Method(
