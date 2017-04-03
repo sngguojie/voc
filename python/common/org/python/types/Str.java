@@ -72,7 +72,7 @@ public class Str extends org.python.types.Object {
     public org.python.Object __repr__() {
         String result = "";
         char[] charArray = this.value.toCharArray();
-        for (int i = 0 ; i < charArray.length; i++) {
+        for (int i = 0; i < charArray.length; i++) {
             if (isLineBreak(charArray[i])) {
                 String lineBreak = "\\";
                 String hexString = Integer.toHexString(charArray[i]);
@@ -1370,15 +1370,15 @@ public class Str extends org.python.types.Object {
         }
         return result_list;
     }
-    
-    private static boolean isLineBreak (char character) {
+
+    private static boolean isLineBreak(char character) {
         // List of line boundaries from https://docs.python.org/3.4/library/stdtypes.html#str.splitlines
         switch (character) {
-            case '\n': 
-            case '\r': 
-            case '\u000B': 
-            case '\u000C': 
-            case '\u001C': 
+            case '\n':
+            case '\r':
+            case '\u000B':
+            case '\u000C':
+            case '\u001C':
             case '\u001D':
             case '\u001E':
             case '\u0085':
